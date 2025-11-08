@@ -1,7 +1,8 @@
 CC      ?= gcc
-CFLAGS  ?= -Wall -Wextra -std=c99 -pedantic -O2
 SRCDIR  := src
 OBJDIR  := build
+CFLAGS  := -Wall -Wextra -std=c99 -pedantic -O2
+CFLAGS  += -I$(SRCDIR) -D_POSIX_C_SOURCE=200809L
 SOURCES := $(wildcard $(SRCDIR)/*.c) $(wildcard $(SRCDIR)/*/*.c)
 OBJECTS := $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(SOURCES))
 TARGET  := Cash/cash
