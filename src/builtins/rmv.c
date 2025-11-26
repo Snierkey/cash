@@ -11,11 +11,16 @@ static int rm_recursive(const char *path)
         while ((ent = readdir(d))) {
             if (!strcmp(ent->d_name, ".") || !strcmp(ent->d_name, ".."))
                 continue;
-            size_t len = strlen(path) + strlen(ent->d_name) + 2;
-            char *buf = malloc(len);
-            snprintf(buf, len, "%s/%s", path, ent->d_name);
-            rm_recursive(buf);
-            free(buf);
+            
+            char path_buf[PATH_MAX];
+            int r = snprintf(path_buf, sizeof(path_buf), "%s/%s", path, ent->d_name);
+            if (r < 0 || (size_t)r >= sizeof(path_buf)) {
+                fprintf(stderr, "rmv: path too long: %s/%s\n", path, ent->d_name);
+                // continue to try and remove other files, but this one failed
+                // could also return -1 here to stop the whole operation
+                continue; 
+            }
+            rm_recursive(path_buf);
         }
         closedir(d);
         return rmdir(path);

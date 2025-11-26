@@ -10,6 +10,7 @@ static const struct {
     {"dp",   cmd_dp},
     {"sft",  cmd_sft},
     {"show", cmd_show},
+    {"fref", cmd_fref},
     {NULL, NULL}
 };
 

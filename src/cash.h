@@ -11,6 +11,7 @@
 #include <dirent.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <limits.h>
 
 #define CASH_PROMPT "cash> "
 #define MAX_ARGS 64
@@ -25,6 +26,7 @@ int cmd_lnp(int argc, char **argv);
 int cmd_dp(int argc, char **argv);
 int cmd_sft(int argc, char **argv);
 int cmd_show(int argc, char **argv);
+int cmd_fref(int argc, char **argv);
 
 void die(const char *msg);
 char *xstrdup(const char *s);
