@@ -12,10 +12,12 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <limits.h>
+#include <sys/wait.h>
 
 #define CASH_PROMPT "cash> "
 #define MAX_ARGS 64
 #define MAX_LINE 4096
+#define MAX_CMDS 16
 
 int parse_line(char *line, char **argv, int max);
 
