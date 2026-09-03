@@ -1,32 +1,47 @@
 #include "cash.h"
 
-static int rm_recursive(const char *path)
+#define TRASH_DIR ".cash_trash"
+
+static int ensure_trash_dir(void)
 {
     struct stat st;
-    if (lstat(path, &st) < 0) return -1;
-    if (S_ISDIR(st.st_mode)) {
-        DIR *d = opendir(path);
-        if (!d) return -1;
-        struct dirent *ent;
-        while ((ent = readdir(d))) {
-            if (!strcmp(ent->d_name, ".") || !strcmp(ent->d_name, ".."))
-                continue;
-            
-            char path_buf[PATH_MAX];
-            int r = snprintf(path_buf, sizeof(path_buf), "%s/%s", path, ent->d_name);
-            if (r < 0 || (size_t)r >= sizeof(path_buf)) {
-                fprintf(stderr, "rmv: path too long: %s/%s\n", path, ent->d_name);
-                // continue to try and remove other files, but this one failed
-                // could also return -1 here to stop the whole operation
-                continue; 
-            }
-            rm_recursive(path_buf);
+    if (stat(TRASH_DIR, &st) == 0) {
+        if (!S_ISDIR(st.st_mode)) {
+            fprintf(stderr, "rmv: %s exists and is not a directory\n", TRASH_DIR);
+            return -1;
         }
-        closedir(d);
-        return rmdir(path);
-    } else {
-        return unlink(path);
+        return 0;
     }
+    if (mkdir(TRASH_DIR, 0700) < 0) {
+        perror("rmv");
+        return -1;
+    }
+    return 0;
+}
+
+static int trash(const char *path)
+{
+    if (ensure_trash_dir() < 0) return -1;
+
+    const char *base = strrchr(path, '/');
+    base = base ? base + 1 : path;
+
+    static unsigned counter = 0;
+    char trash_path[PATH_MAX];
+    int r = snprintf(trash_path, sizeof trash_path, "%s/%ld_%u_%s",
+                      TRASH_DIR, (long)getpid(), counter++, base);
+    if (r < 0 || (size_t)r >= sizeof trash_path) {
+        fprintf(stderr, "rmv: path too long: %s\n", path);
+        return -1;
+    }
+
+    if (rename(path, trash_path) < 0) {
+        perror(path);
+        return -1;
+    }
+
+    journal_push_rename(trash_path, path);
+    return 0;
 }
 
 int cmd_rmv(int argc, char **argv)
@@ -41,17 +56,22 @@ int cmd_rmv(int argc, char **argv)
         fprintf(stderr, "usage: rmv [--force|-f] <file|dir> ...\n");
         return 1;
     }
+
+    int status = 0;
     for (int i = idx; i < argc; ++i) {
         struct stat st;
         if (lstat(argv[i], &st) < 0) {
             perror(argv[i]);
+            status = 1;
             continue;
         }
-        if (S_ISDIR(st.st_mode) && force) {
-            if (rm_recursive(argv[i]) < 0) perror(argv[i]);
-        } else {
-            if (unlink(argv[i]) < 0) perror(argv[i]);
+        if (S_ISDIR(st.st_mode) && !force) {
+            fprintf(stderr, "rmv: %s is a directory (use --force)\n", argv[i]);
+            status = 1;
+            continue;
         }
+        if (trash(argv[i]) < 0) status = 1;
     }
-    return 0;
+    return status;
 }
+

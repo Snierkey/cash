@@ -10,5 +10,6 @@ int cmd_sft(int argc, char **argv)
         perror("sft");
         return 1;
     }
+    journal_push_rename(argv[2], argv[1]);
     return 0;
 }

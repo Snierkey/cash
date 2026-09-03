@@ -10,5 +10,6 @@ int cmd_drm(int argc, char **argv)
         perror("drm");
         return 1;
     }
+    journal_push_rmdir(argv[1]);
     return 0;
 }

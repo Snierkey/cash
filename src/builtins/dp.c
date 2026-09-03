@@ -27,5 +27,6 @@ int cmd_dp(int argc, char **argv)
         }
     close(src);
     close(dst);
+    journal_push_unlink(argv[2]);
     return 0;
 }

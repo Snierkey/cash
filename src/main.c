@@ -11,6 +11,7 @@ static const struct {
     {"sft",  cmd_sft},
     {"show", cmd_show},
     {"fref", cmd_fref},
+    {"undo", cmd_undo},
     {NULL, NULL}
 };
 
