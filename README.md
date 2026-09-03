@@ -1,7 +1,23 @@
-# Cash (Command Automation Shell)
+# cash
 
-This project currently lacks a description, as it remains under active development.
+A shell written from scratch in C. work in progress
 
-## LICENSE
+## Build
 
-This project is licensed under the Zlib/libpng License. See the [LICENSE](LICENSE) file for details.
+```
+make
+./Cash/cash
+```
+
+## What it has
+
+- builtins: `dp`, `sft`, `drm`, `rmv`, `lnp`, `fref`, `show`, `undo`
+- runs external commands
+- pipes: `|`
+- redirection: `<`, `>`, `>>`
+
+## What it doesnt have
+
+variables, scripting, job control, history and config file
+do NOT use as daily shell
+
