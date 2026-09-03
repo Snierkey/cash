@@ -46,3 +46,10 @@ int journal_pop(journal_entry_t *out)
     return 1;
 }
 
+int journal_peek(journal_entry_t *out)
+{
+    if (count == 0) return 0;
+    *out = log_[count - 1];
+    return 1;
+}
+
